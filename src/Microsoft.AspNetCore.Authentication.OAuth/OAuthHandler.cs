@@ -63,16 +63,20 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             var error = query["error"];
             if (!StringValues.IsNullOrEmpty(error))
             {
+                // TODO: Add first class properties for these?
+                properties.Items[".error"] = error;
                 var failureMessage = new StringBuilder();
                 failureMessage.Append(error);
                 var errorDescription = query["error_description"];
                 if (!StringValues.IsNullOrEmpty(errorDescription))
                 {
+                    properties.Items[".error_description"] = errorDescription;
                     failureMessage.Append(";Description=").Append(errorDescription);
                 }
                 var errorUri = query["error_uri"];
                 if (!StringValues.IsNullOrEmpty(errorUri))
                 {
+                    properties.Items[".error_uri"] = errorUri;
                     failureMessage.Append(";Uri=").Append(errorUri);
                 }
 

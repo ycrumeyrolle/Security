@@ -552,7 +552,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 // if any of the error fields are set, throw error null
                 if (!string.IsNullOrEmpty(authorizationResponse.Error))
                 {
-                    return HandleRequestResult.Fail(CreateOpenIdConnectProtocolException(authorizationResponse, response: null), properties);
+                    return HandleRequestResult.Fail(CreateOpenIdConnectProtocolException(authorizationResponse, response: null, properties: properties), properties);
                 }
 
                 if (_configuration == null && Options.ConfigurationManager != null)
@@ -801,7 +801,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             if (!responseMessage.IsSuccessStatusCode)
             {
-                throw CreateOpenIdConnectProtocolException(message, responseMessage);
+                throw CreateOpenIdConnectProtocolException(message, responseMessage, new AuthenticationProperties());
             }
 
             return message;
@@ -1247,10 +1247,22 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             return BuildRedirectUri(uri);
         }
 
-        private OpenIdConnectProtocolException CreateOpenIdConnectProtocolException(OpenIdConnectMessage message, HttpResponseMessage response)
+        private OpenIdConnectProtocolException CreateOpenIdConnectProtocolException(OpenIdConnectMessage message, HttpResponseMessage response, AuthenticationProperties properties)
         {
             var description = message.ErrorDescription ?? "error_description is null";
             var errorUri = message.ErrorUri ?? "error_uri is null";
+            if (!string.IsNullOrEmpty(message.Error))
+            {
+                properties.Items[".error"] = message.Error;
+            }
+            if (!string.IsNullOrEmpty(message.ErrorDescription))
+            {
+                properties.Items[".error_description"] = message.ErrorDescription;
+            }
+            if (!string.IsNullOrEmpty(message.ErrorUri))
+            {
+                properties.Items[".error_uri"] = message.ErrorUri;
+            }
 
             if (response != null)
             {

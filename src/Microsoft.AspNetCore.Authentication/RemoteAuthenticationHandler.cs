@@ -5,6 +5,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -102,10 +103,20 @@ namespace Microsoft.AspNetCore.Authentication
                         throw new Exception("An error was returned from the RemoteFailure event.", errorContext.Result.Failure);
                     }
                 }
-
+                properties = errorContext.Properties ?? new AuthenticationProperties();
                 if (errorContext.Failure != null)
                 {
-                    throw new Exception("An error was encountered while handling the remote login.", errorContext.Failure);
+                    var builder = new QueryBuilder();
+                    if (properties.Items.TryGetValue(".error", out var error))
+                    {
+                        builder.Add("error", error);
+                    }
+                    if (properties.Items.TryGetValue(".error_description", out var errorDescription))
+                    {
+                        builder.Add("error_description", errorDescription);
+                    }
+                    Context.Response.Redirect(Options.RemoteFailureRedirect + builder.ToQueryString());
+                    return true;
                 }
             }
 

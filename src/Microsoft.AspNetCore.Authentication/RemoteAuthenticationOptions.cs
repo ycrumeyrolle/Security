@@ -102,6 +102,8 @@ namespace Microsoft.AspNetCore.Authentication
         /// </summary>
         public TimeSpan RemoteAuthenticationTimeout { get; set; } = TimeSpan.FromMinutes(15);
 
+        public PathString RemoteFailureRedirect { get; set; } = "/Home/Error";
+
         public new RemoteAuthenticationEvents Events
         {
             get => (RemoteAuthenticationEvents)base.Events;
